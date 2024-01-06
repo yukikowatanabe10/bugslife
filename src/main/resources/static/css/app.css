@@ -28,12 +28,19 @@ a.btn-link {
 }
 
 /* PC */
+
+@media (min-width: 1000px){
+  nav.navbar{
+    display: none;
+  }
+}
+
 .app-show-container {
   width: 100%;
 }
 
 /* タブレット */
-@media (max-width: 768px) { 
+@media (max-width: 768px) {
   /* 一覧 */
   .for-tablet {
     display: none;
@@ -60,4 +67,5 @@ a.btn-link {
   span.font-impact {
     font-size: xx-large;
   }
+
 }
