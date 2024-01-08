@@ -36,7 +36,14 @@ public class ShopController {
 		if (name.isPresent()) {
 			probe.setName(name.get());
 		}
-		List<Shop> shops = shopService.serchShops(probe.getName());
+
+		List<Shop> shops;
+		if (name.isPresent() && !(name.get().isEmpty())) {
+			shops = shopService.serchShops(probe.getName());
+		} else {
+			shops = shopService.findAll();
+		}
+
 		model.addAttribute("listShop", shops);
 		model.addAttribute("name", name.isPresent() ? name.get() : null);
 		return "shop/index";
