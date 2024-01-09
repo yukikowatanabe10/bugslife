@@ -42,7 +42,7 @@ $(document).ready(function () {
       type: "POST",
       dataType: "text",
       contentType: "application/json",
-      data: postData,
+      data: JSON.stringify(postData),
     }).done(function (data) {
       $("#success-message").text(data).show().fadeOut(3000);
     });
