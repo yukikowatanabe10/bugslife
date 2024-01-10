@@ -15,6 +15,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 
 import com.example.entity.ProductWithCategoryName;
@@ -62,8 +63,8 @@ public class ProductService {
 		final CriteriaQuery<ProductWithCategoryName> query = builder.createQuery(ProductWithCategoryName.class);
 		final Root<Product> root = query.from(Product.class);
 
-		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts");
-		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category");
+		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts", JoinType.LEFT);
+		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category", JoinType.LEFT);
 
 		query.multiselect(
 				root.get("id"),
@@ -93,9 +94,9 @@ public class ProductService {
 		// weight で範囲検索
 		if (form.getWeight1() != null && form.getWeight2() != null) {
 			query.where(builder.between(root.get("weight"), form.getWeight1(), form.getWeight2()));
-		} else if (form.getWeight2() != null) {
-			query.where(builder.greaterThanOrEqualTo(root.get("weight"), form.getWeight1()));
 		} else if (form.getWeight1() != null) {
+			query.where(builder.greaterThanOrEqualTo(root.get("weight"), form.getWeight1()));
+		} else if (form.getWeight2() != null) {
 			query.where(builder.lessThanOrEqualTo(root.get("weight"), form.getWeight2()));
 		}
 
