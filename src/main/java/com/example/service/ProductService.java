@@ -1,9 +1,17 @@
 package com.example.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.entity.ProductWithCategoryName;
+import com.example.form.ProductForm;
+import com.example.form.ProductSearchForm;
 import com.example.model.Category;
 import com.example.model.CategoryProduct;
 import com.example.model.Product;
@@ -17,14 +25,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
-
-import com.example.entity.ProductWithCategoryName;
-import com.example.form.ProductForm;
-import com.example.form.ProductSearchForm;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import jakarta.persistence.criteria.Subquery;
 
 @Service
 @Transactional(readOnly = true)
@@ -86,9 +87,17 @@ public class ProductService {
 			query.where(builder.like(root.get("code"), "%" + form.getCode() + "%"));
 		}
 
-		if (form.getCategories() != null && form.getCategories().size() > 0) {
-			// categories で完全一致検索
-			query.where(categoryJoin.get("id").in(form.getCategories()));
+		if (form.getCategories() != null && !form.getCategories().isEmpty()) {
+			Subquery<Long> subquery = query.subquery(Long.class);
+			Root<CategoryProduct> subqueryRoot = subquery.from(CategoryProduct.class);
+			subquery.select(subqueryRoot.get("product").get("id"))
+					.where(subqueryRoot.get("category").get("id").in(form.getCategories()))
+					.groupBy(subqueryRoot.get("product").get("id"))
+					.having(builder.equal(builder.count(subqueryRoot.get("category").get("id")),
+							form.getCategories().size()));
+
+			query.where(builder.equal(root.get("shopId"), shopId),
+					root.get("id").in(subquery));
 		}
 
 		// weight で範囲検索
@@ -123,7 +132,7 @@ public class ProductService {
 
 	/**
 	 * ProductFormの内容を元に商品情報を保存する
-	 * 
+	 *
 	 * @param entity
 	 * @return
 	 */
