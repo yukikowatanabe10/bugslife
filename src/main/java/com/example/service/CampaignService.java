@@ -129,8 +129,13 @@ public class CampaignService {
 				if (nexStatus.getId() == campaign.getStatus().getId()) {
 					throw new RuntimeException(campaign.getName() + "にステータスの変更がないため、ステータスの一括更新に失敗しました。");
 				}
-				campaign.setStatus(nexStatus);
-				campaignRepository.save(campaign);
+			});
+			idList.forEach(id -> {
+				Campaign campaign = campaignRepository.findById(id).get();
+				if (nexStatus.getId() != campaign.getStatus().getId()) {
+					campaign.setStatus(nexStatus);
+					campaignRepository.save(campaign);
+				}
 			});
 		} catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
