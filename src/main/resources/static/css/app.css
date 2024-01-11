@@ -7,10 +7,29 @@
   white-space: nowrap;
 }
 
+
+
 /* 詳細 */
 span.font-impact {
-  font-family: "Impact";
-  font-size: small;
+  font-size: 16px;
+}
+
+
+.btn-warning{
+  background-color: rgb(18, 158, 239);
+}
+
+.btn-info{
+  background-color: rgb(247, 56, 167);
+}
+
+
+
+.description{
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
+  
 }
 
 a.btn {
@@ -20,6 +39,8 @@ a.btn {
   -webkit-user-select: none;
   user-select: none;
   cursor: default;
+  position: relative;
+  top: 0px; 
 }
 
 a.btn-link {
@@ -27,13 +48,11 @@ a.btn-link {
   height: 36px;
 }
 
-/* PC */
-
-@media (min-width: 1000px){
-  nav.navbar{
-    display: none;
-  }
+.btn-light{
+  background-color: gray;
 }
+
+/* PC */
 
 .app-show-container {
   width: 100%;
@@ -50,7 +69,7 @@ a.btn-link {
     height: 3000px;
   }
   span.font-impact {
-    font-size: x-large;
+    font-size: 16px;
   }
 }
 
