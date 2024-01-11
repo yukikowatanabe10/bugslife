@@ -75,9 +75,18 @@ public class CampaignController {
 	@GetMapping("/{id}")
 	public String show(Model model, @PathVariable("id") Long id) {
 		if (id != null) {
-			Optional<Category> campaign = categoryService.findOne(id);
-			model.addAttribute("campaign", campaign.get());
-			this.setCommonData(model);
+
+			Optional<Campaign> campaignOpt = campaignService.findOne(id);
+			if (campaignOpt.isPresent()) {
+				model.addAttribute("campaign", campaignOpt.get());
+				this.setCommonData(model);
+				System.out.println("eroor1");
+			} else {
+				System.out.println("eroor");
+				// キャンペーンが見つからない場合の処理。適切なエラーメッセージやリダイレクトを行う
+				// 例: model.addAttribute("error", "指定されたキャンペーンが存在しません。");
+				return "campaign/error"; // 適切なエラーページにリダイレクト
+			}
 		}
 		return "campaign/show";
 	}
