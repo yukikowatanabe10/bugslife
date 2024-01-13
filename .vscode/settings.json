@@ -6,5 +6,9 @@
     "editor.insertSpaces": false
   },
   "editor.formatOnSave": true,
-  "cSpell.words": ["headerdisplay"]
+  "cSpell.words": [
+    "headerdisplay"
+  ],
+  "commentTranslate.multiLineMerge": true,
+  "java.debug.settings.onBuildFailureProceed": true
 }
