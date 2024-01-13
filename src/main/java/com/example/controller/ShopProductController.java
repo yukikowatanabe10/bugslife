@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.constants.Message;
 import com.example.constants.TaxType;
-import com.example.entity.ProductWithCategoryName;
+import com.example.entity.ProductWithCategoryNames;
 import com.example.form.ProductForm;
 import com.example.form.ProductSearchForm;
 import com.example.model.Category;
@@ -38,10 +38,9 @@ public class ShopProductController {
 	@Autowired
 	private CategoryService categoryService;
 
-
 	@GetMapping
 	public String index(Model model, @PathVariable("shopId") Long shopId, @ModelAttribute ProductSearchForm request) {
-		List<ProductWithCategoryName> all = productService.search(shopId, request);
+		List<ProductWithCategoryNames> all = productService.search(shopId, request);
 		List<Category> categories = categoryService.findAll();
 		model.addAttribute("listProduct", all);
 		model.addAttribute("categories", categories);
@@ -73,7 +72,8 @@ public class ShopProductController {
 	}
 
 	@PostMapping
-	public String create(Model model, @PathVariable("shopId") Long shopId, @Validated @ModelAttribute ProductForm productForm,
+	public String create(Model model, @PathVariable("shopId") Long shopId,
+			@Validated @ModelAttribute ProductForm productForm,
 			BindingResult result, RedirectAttributes redirectAttributes) {
 		// バリデーションチェック
 		if (result.hasErrors()) {
@@ -113,8 +113,9 @@ public class ShopProductController {
 	}
 
 	@PutMapping
-	public String update(Model model, @PathVariable("shopId") Long shopId, @Validated @ModelAttribute ProductForm productForm,
-			BindingResult result,RedirectAttributes redirectAttributes) {
+	public String update(Model model, @PathVariable("shopId") Long shopId,
+			@Validated @ModelAttribute ProductForm productForm,
+			BindingResult result, RedirectAttributes redirectAttributes) {
 		System.out.append(Message.MSG_ERROR, 0, 0);
 		// バリデーションチェック
 		if (result.hasErrors()) {

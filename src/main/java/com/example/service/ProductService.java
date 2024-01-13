@@ -1,7 +1,9 @@
 package com.example.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.entity.ProductWithCategoryName;
+import com.example.entity.ProductWithCategoryNames;
 import com.example.form.ProductForm;
 import com.example.form.ProductSearchForm;
 import com.example.model.Category;
@@ -25,7 +28,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 
 @Service
 @Transactional(readOnly = true)
@@ -59,7 +61,7 @@ public class ProductService {
 	}
 
 	// 指定された検索条件に一致するエンティティを検索する
-	public List<ProductWithCategoryName> search(Long shopId, ProductSearchForm form) {
+	public List<ProductWithCategoryNames> search(Long shopId, ProductSearchForm form) {
 		final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		final CriteriaQuery<ProductWithCategoryName> query = builder.createQuery(ProductWithCategoryName.class);
 		final Root<Product> root = query.from(Product.class);
@@ -87,17 +89,9 @@ public class ProductService {
 			query.where(builder.like(root.get("code"), "%" + form.getCode() + "%"));
 		}
 
-		if (form.getCategories() != null && !form.getCategories().isEmpty()) {
-			Subquery<Long> subquery = query.subquery(Long.class);
-			Root<CategoryProduct> subqueryRoot = subquery.from(CategoryProduct.class);
-			subquery.select(subqueryRoot.get("product").get("id"))
-					.where(subqueryRoot.get("category").get("id").in(form.getCategories()))
-					.groupBy(subqueryRoot.get("product").get("id"))
-					.having(builder.equal(builder.count(subqueryRoot.get("category").get("id")),
-							form.getCategories().size()));
-
-			query.where(builder.equal(root.get("shopId"), shopId),
-					root.get("id").in(subquery));
+		if (form.getCategories() != null && form.getCategories().size() > 0) {
+			// categories で完全一致検索
+			query.where(categoryJoin.get("id").in(form.getCategories()));
 		}
 
 		// weight で範囲検索
@@ -127,7 +121,26 @@ public class ProductService {
 			query.where(builder.lessThanOrEqualTo(root.get("price"), form.getPrice2()));
 		}
 
-		return entityManager.createQuery(query).getResultList();
+		List<ProductWithCategoryName> results = entityManager.createQuery(query).getResultList();
+
+		Map<Long, ProductWithCategoryNames> productMap = new HashMap<>();
+
+		for (ProductWithCategoryName productWithCategoryName : results) {
+
+			ProductWithCategoryNames productWithCategoryNames = productMap.get(productWithCategoryName.getId());
+			if (productWithCategoryNames == null) {
+				productWithCategoryNames = new ProductWithCategoryNames();
+				productWithCategoryNames.setId(productWithCategoryName.getId());
+				productWithCategoryNames.setName(productWithCategoryName.getName());
+				productWithCategoryNames.setCategoryNames(new ArrayList<>());
+				productMap.put(productWithCategoryName.getId(), productWithCategoryNames);
+			}
+			productWithCategoryNames.getCategoryNames().add(productWithCategoryName.getCategoryName());
+		}
+
+		List<ProductWithCategoryNames> awcList = new ArrayList<>(productMap.values());
+
+		return awcList;
 	}
 
 	/**
