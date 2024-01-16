@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout}">
+<th:block layout:fragment="content">
+  <h1>税額詳細</h1>
+  <hr />
+  <div class="form-group">
+    <label for="name">名前: </label>
+    <span th:text="${taxAmount.name}"></span>
+  </div>
+  <div class="form-group">
+    <label for="taxAmount">税額: </label>
+    <span th:text="${taxAmount.rate} + '%'"></span>
+  </div>
+  <a class="btn btn-link" th:href="@{/taxAmount}">一覧へ戻る</a>
+  <br />
+</th:block>
+
+</html>
