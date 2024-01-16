@@ -3,11 +3,6 @@
   layout:decorate="~{layout/layout}">
 <th:block layout:fragment="content">
   <h1>税額詳細</h1>
-  <hr />
-  <div class="form-group">
-    <label for="name">名前: </label>
-    <span th:text="${taxAmount.name}"></span>
-  </div>
   <div class="form-group">
     <label for="taxAmount">税額: </label>
     <span th:text="${taxAmount.rate} + '%'"></span>

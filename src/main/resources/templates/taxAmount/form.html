@@ -6,6 +6,10 @@
   <hr />
   <form th:action="@{/taxAmount}" th:method="post" th:object="${taxAmount}">
     <div class="form-group">
+      <label for="name">税名</label>
+      <input id="name" name="name" type="text" class="form-control" th:field="*{name}" th:errorclass="is-invalid" />
+    </div>
+    <div class="form-group">
       <label for="rate">税率</label>
       <input id="rate" name="rate" type="number" class="form-control" th:field="*{rate}" step="0.1"
         th:errorclass="is-invalid" />

@@ -8,12 +8,13 @@
   <table class="table">
     <thead>
       <tr>
+        <th>税名</th>
         <th>税率</th>
-        <th></th>
       </tr>
     </thead>
     <tbody>
       <tr th:each="taxAmount : ${taxAmounts}">
+        <td th:text="${taxAmount.name}"></td>
         <td th:text="${taxAmount.rate} + '%'"></td>
         <td>
           <a class="btn btn-primary" th:href="@{/taxAmount/show/{id}(id = ${taxAmount.id})}">参照</a>
