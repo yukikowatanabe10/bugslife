@@ -72,12 +72,24 @@
             <td>
               <span class="badge text-bg-danger" th:if="${orderShipping.uploadStatus == 'error'}">エラー</span>
               <span class="badge text-bg-success" th:if="${orderShipping.uploadStatus == 'success'}">成功</span>
+              <span class="badge text-bg-danger" th:if="${orderShipping.uploadStatus == '1'}">未発送</span>
             </td>
           </tr>
         </tbody>
       </table>
     </form>
   </div>
+  <h3>未受注</h3>
+  <table>
+    <thead>
+      <tr th:each="order : ${orders}">
+        <td th:text="${order.id}"></td>
+        <td th:text="${order.status == 'ordered' ? '未発送' : order.status}"></td>
+      </tr>
+    </thead>
+  </table>
+
+</div>
 </th:block>
 
 </html>

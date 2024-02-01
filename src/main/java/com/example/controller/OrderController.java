@@ -2,7 +2,14 @@ package com.example.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
 
+
+import java.nio.charset.StandardCharsets;
+
+import org.apache.groovy.util.Arrays;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +23,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.constants.Message;
@@ -24,8 +33,13 @@ import com.example.enums.PaymentMethod;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
 import com.example.model.Order;
+import com.example.model.OrderDeliveries;
+import com.example.model.OrderShipping;
+import com.example.model.OrderShippingData;
 import com.example.service.OrderService;
 import com.example.service.ProductService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/orders")
@@ -37,6 +51,7 @@ public class OrderController {
 	@Autowired
 	private ProductService productService;
 
+	
 	@GetMapping
 	public String index(Model model) {
 		List<Order> all = orderService.findAll();
@@ -135,4 +150,95 @@ public class OrderController {
 			return "redirect:/orders";
 		}
 	}
+
+	@GetMapping("/shipping")
+    public String shipping(Model model) {
+        List<Order> orders = orderService.findByStatus("ordered");
+        
+        model.addAttribute("orders", orders);
+        return "order/shipping";
+    }
+
+	@PostMapping("/shipping/download")
+	public void download(HttpServletResponse response){
+		String csvHeader = "orderId,shippiorngCode,shippingDate,deliveryDate,deliveryTimezone\n";
+		StringBuilder csvBuilder = new StringBuilder(csvHeader);
+		List<Order> orders = this.orderService.findByStatus("ordered");
+
+
+		for(Order order : orders){
+			csvBuilder.append(order.getId()).append(",");
+			csvBuilder.append(",");
+			csvBuilder.append(",");
+			csvBuilder.append(",");
+			csvBuilder.append(",").append("\n");
+    	}
+
+		try {
+			// レスポンスヘッダーの設定
+			response.setContentType("text/csv");
+			response.setHeader("Content-Disposition", "attachment; filename=\"shipping.csv\"");
+	
+			// CSVデータの書き込み
+			OutputStream outputStream = response.getOutputStream();
+			outputStream.write(csvBuilder.toString().getBytes(StandardCharsets.UTF_8));
+			outputStream.flush();
+			outputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@PostMapping("/shipping")
+	public String uploadFile(@RequestParam("file") MultipartFile uploadFile, RedirectAttributes redirectAttributes, Model model){
+		if (uploadFile.isEmpty()) {
+			// ファイルが存在しない場合
+			redirectAttributes.addFlashAttribute("validationError", "ファイルを選択してください。");
+			return "redirect:/orders/shipping";
+		}
+
+		if (!"text/csv".equals(uploadFile.getContentType())) {
+			// CSVファイル以外の場合
+			redirectAttributes.addFlashAttribute("validationError", "CSVファイルを選択してください。");
+			return "redirect:/orders/shipping";
+		}
+
+		try {
+    	List<OrderDeliveries> deliveries = orderService.importCSV(uploadFile);
+    	List<OrderShipping> orderShippingList = new ArrayList<>();
+
+    // OrderDeliveries のデータを OrderShipping に変換し、orderShippingList に追加
+    for (OrderDeliveries delivery : deliveries) {
+        OrderShipping orderShipping = new OrderShipping();
+        orderShipping.setOrderId(delivery.getOrder().getId());
+        orderShipping.setShippingCode(delivery.getShippingCode());
+        orderShipping.setShippingDate(delivery.getShippingDate());
+        orderShipping.setDeliveryDate(delivery.getDeliveryDate());
+        orderShipping.setDeliveryTimezone(delivery.getDeliveryTimeZone());
+		orderShipping.setUploadStatus("1");
+		orderShippingList.add(orderShipping);
+    }
+
+    OrderShippingData orderShippingData = new OrderShippingData(orderShippingList);
+    model.addAttribute("orderShippingData", orderShippingData);
+
+    return "order/shipping";
+} catch (Throwable e) {
+    redirectAttributes.addFlashAttribute("validationError", e.getMessage());
+    e.printStackTrace();
+    return "redirect:/orders/shipping";
+}
+
+
+		//return "redirect:/orders/shipping";
+	}
+
+	@PutMapping("/shipping")
+	public String update(@ModelAttribute OrderShippingData orderShippingData){
+    
+
+    return "redirect:/orders/shipping";
+}
+
+	
 }
