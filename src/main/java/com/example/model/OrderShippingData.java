@@ -27,9 +27,7 @@ public class OrderShippingData {
     public List<OrderShipping> getSelectedOrders() {
         List<OrderShipping> selectedOrders = new ArrayList<>();
         for (OrderShipping orderShipping : orderShippingList) {
-            // ここで選択された注文を判定し、selectedOrders に追加するロジックを実装
-            // 例えば、uploadStatus が "2" の注文を選択した場合
-            if ("2".equals(orderShipping.getUploadStatus())) {
+            if ("1".equals(orderShipping.getUploadStatus())) {
                 selectedOrders.add(orderShipping);
             }
         }

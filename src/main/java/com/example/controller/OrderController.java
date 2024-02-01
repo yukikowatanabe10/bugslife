@@ -37,6 +37,7 @@ import com.example.model.OrderDeliveries;
 import com.example.model.OrderShipping;
 import com.example.model.OrderShippingData;
 import com.example.service.OrderService;
+import com.example.service.OrderShippingService;
 import com.example.service.ProductService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,6 +51,9 @@ public class OrderController {
 
 	@Autowired
 	private ProductService productService;
+
+	@Autowired
+    private OrderShippingService orderShippingService;
 
 	
 	@GetMapping
@@ -233,12 +237,20 @@ public class OrderController {
 		//return "redirect:/orders/shipping";
 	}
 
-	@PutMapping("/shipping")
-	public String update(@ModelAttribute OrderShippingData orderShippingData){
+	@PostMapping("/shipping/update")
+public String updateShippingStatus(@ModelAttribute OrderShippingData orderShippingData) {
+    List<OrderShipping> selectedOrders = orderShippingData.getSelectedOrders();
     
+    // 選択されたデータのIDを使用してデータベース内のステータスを "shipped" に変更
+    for (OrderShipping orderShipping : selectedOrders) {
+        orderShipping.setUploadStatus("shipped");
+        // データベースに更新を保存
+        orderShippingService.save(orderShipping);
+    }
 
     return "redirect:/orders/shipping";
 }
 
-	
 }
+
+	

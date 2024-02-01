@@ -2,11 +2,25 @@ package com.example.model;
 
 import java.util.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Component;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class OrderShipping {
+
+    @Id
     private Long orderId;
     private String shippingCode;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date shippingDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date deliveryDate;
+    
     private String deliveryTimezone;
     private boolean checked;
     private String uploadStatus;
