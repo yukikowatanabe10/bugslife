@@ -1,19 +1,46 @@
 package com.example.service;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+import org.antlr.v4.runtime.atn.SemanticContext.OR;
+import org.codehaus.groovy.syntax.Types;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
+import java.io.IOException;
+import java.io.BufferedReader;
+
+import java.io.InputStreamReader;
+
+import java.sql.Timestamp;
+import java.nio.charset.StandardCharsets;
 
 import com.example.constants.TaxType;
+import com.example.enums.CampaignStatus;
+import com.example.enums.DiscountType;
 import com.example.enums.OrderStatus;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
+import com.example.model.Campaign;
 import com.example.model.Order;
+import com.example.model.OrderDeliveries;
 import com.example.model.OrderPayment;
 import com.example.model.OrderProduct;
+import com.example.model.OrderShipping;
+import com.example.model.OrderShippingData;
+import com.example.repository.OrderDeliveriesRepository;
 import com.example.repository.OrderRepository;
 import com.example.repository.ProductRepository;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
@@ -28,9 +55,16 @@ public class OrderService {
 	@Autowired
 	private ProductRepository productRepository;
 
+	@Autowired
+	private OrderDeliveriesRepository orderDeliveries;
+
 	public List<Order> findAll() {
 		return orderRepository.findAll();
 	}
+
+	public List<OrderDeliveries> findAllOrderDeliveries() {
+        return orderDeliveries.findAll();
+    }
 
 	public Optional<Order> findOne(Long id) {
 		return orderRepository.findById(id);
@@ -142,5 +176,54 @@ public class OrderService {
 		order.setPaymentStatus(paymentStatus);
 		orderRepository.save(order);
 	}
+
+	public Order findOrderById(Long id) {
+        Optional<Order> order = orderRepository.findById(id);
+        return order.orElse(null);
+    }
+
+	@Transactional
+	public List<Order> findByStatus(String status){
+		return orderRepository.findByStatus(status);
+	}
+
+	
+
+	@Transactional
+public List<OrderDeliveries> importCSV(MultipartFile file) throws IOException {
+    List<OrderDeliveries> deliveries = new ArrayList<>();
+    try (BufferedReader br = new BufferedReader(
+            new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+        String line = br.readLine(); // 1行目はヘッダーなので読み飛ばす
+        while ((line = br.readLine()) != null) {
+            final String[] split = line.replace("\"", "").split(",");
+            // CSVの列に合わせて適切なデータ型に変換する
+            Long id = Long.parseLong(split[0]);
+            String shippingCode = split[1];
+
+            LocalDate shippingDateLocal = LocalDate.parse(split[2]);
+            Timestamp shippingDate = Timestamp.valueOf(shippingDateLocal.atStartOfDay());
+
+            LocalDate deliveryDateLocal = LocalDate.parse(split[3]);
+            Timestamp deliveryDate = Timestamp.valueOf(deliveryDateLocal.atStartOfDay());
+
+            String deliveryTimeZone = split[4];
+            
+            // Orderオブジェクトの取得方法は適宜調整が必要
+            Order order = findOrderById(Long.parseLong(split[0]));
+            if (order == null) {
+                continue; // Order オブジェクトが存在しない場合はスキップ
+            }
+
+            OrderDeliveries orderDelivery = new OrderDeliveries(
+                id, shippingCode, shippingDate, deliveryDate, deliveryTimeZone);
+            orderDelivery.setOrder(order); // Order オブジェクトを設定
+            deliveries.add(orderDelivery);
+        }
+    }
+    
+    return deliveries; // deliveriesリストを返す
+}
+
 
 }

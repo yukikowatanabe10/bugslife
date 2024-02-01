@@ -18,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -74,6 +75,13 @@ public class Order extends TimeEntity implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "order_id")
 	private List<OrderPayment> orderPayments;
+
+	// 他のフィールドやメソッドは省略
+
+	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    private OrderDeliveries orderDelivery;
+
+
 
 	/**
 	 * 支払い方法名を取得する
