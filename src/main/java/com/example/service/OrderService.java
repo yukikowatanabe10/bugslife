@@ -36,6 +36,7 @@ import com.example.repository.OrderDeliveriesRepository;
 import com.example.repository.OrderRepository;
 import com.example.repository.ProductRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -224,6 +225,12 @@ public List<OrderDeliveries> importCSV(MultipartFile file) throws IOException {
     
     return deliveries; // deliveriesリストを返す
 }
+public void updateOrderStatus(Long orderId, String status) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new EntityNotFoundException("Order not found with id " + orderId));
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
 
 
 }

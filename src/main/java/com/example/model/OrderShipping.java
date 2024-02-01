@@ -7,8 +7,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
+@Table (name = "order_shippings")
 public class OrderShipping {
 
     @Id
@@ -20,7 +22,7 @@ public class OrderShipping {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date deliveryDate;
-    
+
     private String deliveryTimezone;
     private boolean checked;
     private String uploadStatus;

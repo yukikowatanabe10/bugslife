@@ -26,10 +26,11 @@ public class OrderShippingData {
 
     public List<OrderShipping> getSelectedOrders() {
         List<OrderShipping> selectedOrders = new ArrayList<>();
-        for (OrderShipping orderShipping : orderShippingList) {
-            if ("1".equals(orderShipping.getUploadStatus())) {
+            for (OrderShipping orderShipping : orderShippingList) {
                 selectedOrders.add(orderShipping);
-            }
+            // if ("ordered".equals(orderShipping.getUploadStatus())) {
+            //     selectedOrders.add(orderShipping);
+            // }
         }
         return selectedOrders;
     }

@@ -219,7 +219,7 @@ public class OrderController {
         orderShipping.setShippingDate(delivery.getShippingDate());
         orderShipping.setDeliveryDate(delivery.getDeliveryDate());
         orderShipping.setDeliveryTimezone(delivery.getDeliveryTimeZone());
-		orderShipping.setUploadStatus("1");
+		orderShipping.setUploadStatus(delivery.getOrder().getStatus());
 		orderShippingList.add(orderShipping);
     }
 
@@ -237,19 +237,27 @@ public class OrderController {
 		//return "redirect:/orders/shipping";
 	}
 
-	@PostMapping("/shipping/update")
-public String updateShippingStatus(@ModelAttribute OrderShippingData orderShippingData) {
-    List<OrderShipping> selectedOrders = orderShippingData.getSelectedOrders();
-    
-    // 選択されたデータのIDを使用してデータベース内のステータスを "shipped" に変更
-    for (OrderShipping orderShipping : selectedOrders) {
-        orderShipping.setUploadStatus("shipped");
-        // データベースに更新を保存
-        orderShippingService.save(orderShipping);
-    }
-
-    return "redirect:/orders/shipping";
-}
+	
+	@PutMapping("/shipping/update")
+	public String updateShippingStatus(@ModelAttribute OrderShippingData orderShippingData) {
+		List<OrderShipping> selectedOrders = orderShippingData.getSelectedOrders();
+		
+		
+		for (OrderShipping orderShipping : selectedOrders) {
+			orderShipping.getOrderId();
+			// OrderShipping のステータスを更新
+			orderShipping.setUploadStatus("shipped");
+			// orderShippingService.save(orderShipping);
+	
+			// // 紐づく Order のステータスも更新
+			// if (orderShipping.getOrder() != null) {
+			// 	Long orderId = orderShipping.getOrder().getId();
+			// 	orderService.updateOrderStatus(orderId, "shipped");
+			// }
+		}
+	
+		return "redirect:/orders/shipping";
+	}
 
 }
 
