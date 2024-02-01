@@ -30,7 +30,7 @@
     | Key | Type | memo |
     | -------------- | ------- | ---- |
     | orderId | Integer |受注 ID|
-    | shippingCode | String |出荷コード|
+    | shippiorngCode | String |出荷コード|
     | shippingDate | Date |出荷日|
     | deliveryDate | Date | 配達日|
     | deliveryTimezone | String | 配達時間帯 |
