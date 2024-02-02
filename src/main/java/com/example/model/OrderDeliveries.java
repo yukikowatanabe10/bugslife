@@ -13,12 +13,14 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import java.sql.Timestamp;
+import java.util.List;
 
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
+
 @Table(name = "order_deliveries")
 public class OrderDeliveries extends TimeEntity implements Serializable{
 
@@ -28,16 +30,10 @@ public class OrderDeliveries extends TimeEntity implements Serializable{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 他のフィールドやメソッドは省略
 
-     @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
-
-    
-
-    // @Column
-    // private Integer orderId;
 
     @Column
     private String shippingCode;
@@ -49,20 +45,16 @@ public class OrderDeliveries extends TimeEntity implements Serializable{
     private Timestamp deliveryDate;
 
     @Column
-    private String deliveryTimeZone;
+    private String deliveryTimezone;
 
-    @Column
-    private Boolean checked;
 
-    @Column
-    private String uploadStatus;
 
-    public OrderDeliveries(Long id, String shippingCode, Timestamp shippingDate, Timestamp deliveryDate,String deliveryTimeZone){
+    public OrderDeliveries(Long id, String shippingCode, Timestamp shippingDate, Timestamp deliveryDate,String deliveryTimezone){
         this.id = id;
         this.shippingCode = shippingCode;
         this.shippingDate = shippingDate;
         this.deliveryDate = deliveryDate;
-        this.deliveryTimeZone = deliveryTimeZone;
+        this.deliveryTimezone = deliveryTimezone;
         
     }
 
@@ -71,6 +63,8 @@ public class OrderDeliveries extends TimeEntity implements Serializable{
     public void setOrder(Order order){
         this.order = order;
     }
+
+    
 
     
     

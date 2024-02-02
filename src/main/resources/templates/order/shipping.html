@@ -28,9 +28,11 @@
   </div>
 
   <!-- CSVの読み込み内容を表示する -->
-  <div th:if="${orderShippingData}">
+
+
+  <div th:if="${orderShippingList}">
     <!-- チェックを入れたデータのみ出荷済みに更新する -->
-    <form th:action="@{/orders/shipping/update}" th:method="put" th:object="${orderShippingData}">
+    <form th:action="@{/orders/shipping/update}" th:method="put" th:object="${OrderShippingData}">
       <button type="submit" class="btn btn-success">出荷情報更新</button>
       <table class="table">
         <thead>
@@ -45,34 +47,34 @@
           </tr>
         </thead>
         <tbody>
-          <tr th:each="orderShipping, st : *{orderShippingList}">
+          <tr th:each="orderShipping, st : ${orderShippingList}">
             <td>
-              <input class="row_check" type="checkbox" th:field="*{orderShippingList[__${st.index}__].checked}" />
+                <input class="row_check" type="checkbox" th:value="${orderShipping.order.id}" th:name="selectedOrderIds"/>
             </td>
             <td>
-              <th:block th:text="${orderShipping.orderId}"></th:block>
-              <input type="hidden" th:field="*{orderShippingList[__${st.index}__].orderId}" />
+              <th:block th:text="${orderShipping.order.id}"></th:block>
+              <input type="hidden" th:value="${orderShipping.order.id}"/>
             </td>
             <td>
               <th:block th:text="${orderShipping.shippingCode}"></th:block>
-              <input type="hidden" th:field="*{orderShippingList[__${st.index}__].shippingCode}" />
+              <input type="hidden" th:value="${orderShipping.shippingCode}" />
             </td>
             <td>
               <th:block th:text="${orderShipping.shippingDate}"></th:block>
-              <input type="hidden" th:field="*{orderShippingList[__${st.index}__].shippingDate}" />
+              <input type="hidden" th:value="${orderShipping.shippingDate}" />
             </td>
             <td>
               <th:block th:text="${orderShipping.deliveryDate}"></th:block>
-              <input type="hidden" th:field="*{orderShippingList[__${st.index}__].deliveryDate}" />
+              <input type="hidden" th:value="${orderShipping.deliveryDate}" />
             </td>
             <td>
-              <th:block th:text="${orderShipping.deliveryTimezone}"></th:block>
-              <input type="hidden" th:field="*{orderShippingList[__${st.index}__].deliveryTimezone}" />
+              <th:block th:text="${orderShipping.deliveryTimezone}"></th:block> 
+              <input type="hidden" th:value="${orderShipping.deliveryTimezone}" />
             </td>
             <td>
-              <span class="badge text-bg-danger" th:if="${orderShipping.uploadStatus == 'error'}">エラー</span>
-              <span class="badge text-bg-success" th:if="${orderShipping.uploadStatus == 'success'}">成功</span>
-              <span class="badge text-bg-danger" th:if="${orderShipping.uploadStatus == 'ordered'}">未発送</span>
+              <span class="badge text-bg-danger" th:if="${orderShipping.order.status == 'error'}">エラー</span>
+              <span class="badge text-bg-success" th:if="${orderShipping.order.status == 'success'}">成功</span>
+              <span class="badge text-bg-danger" th:if="${orderShipping.order.status == 'ordered'}">未発送</span>
             </td>
           </tr>
         </tbody>

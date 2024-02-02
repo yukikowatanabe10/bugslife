@@ -7,31 +7,14 @@ import java.util.ArrayList;
 
 @Component
 public class OrderShippingData {
-    private List<OrderShipping> orderShippingList;
-    
+    private List<Long> selectedOrderIds;
 
-    public OrderShippingData() {}
-
-    public OrderShippingData(List<OrderShipping> orderShippingList) {
-        this.orderShippingList = orderShippingList;
+    // getters and setters
+    public List<Long> getSelectedOrderIds() {
+        return selectedOrderIds;
     }
 
-    public void setOrderShippingList(List<OrderShipping> orderShippingList) {
-        this.orderShippingList = orderShippingList;
-    }
-
-    public List<OrderShipping> getOrderShippingList() {
-        return orderShippingList;
-    }
-
-    public List<OrderShipping> getSelectedOrders() {
-        List<OrderShipping> selectedOrders = new ArrayList<>();
-            for (OrderShipping orderShipping : orderShippingList) {
-                selectedOrders.add(orderShipping);
-            // if ("ordered".equals(orderShipping.getUploadStatus())) {
-            //     selectedOrders.add(orderShipping);
-            // }
-        }
-        return selectedOrders;
+    public void setSelectedOrderIds(List<Long> selectedOrderIds) {
+        this.selectedOrderIds = selectedOrderIds;
     }
 }
