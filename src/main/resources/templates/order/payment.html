@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout}">
+<th:block layout:fragment="content">
+  <h1>入金</h1>
+  <hr />
+  <a th:href="@{/orders}" class="btn btn-default">Back</a><br /><br />
+
+  <div class="mb-4">
+    <div class="row">
+      <!-- CSVの読み込み -->
+      <form class="row col-6" th:action="@{/orders/payment}" method="post" enctype="multipart/form-data">
+        <div class="input-group">
+          <input class="form-control" type="file" id="file" name="file" accept=".csv" />
+          <button type="submit" class="btn btn-primary">読込</button>
+        </div>
+      </form>
+      <!-- テンプレートCSVのダウンロード -->
+      <form th:method="post" th:action="@{/orders/payment/download}" enctype="multipart/form-data" class="col-4">
+        <input type="submit" value="テンプレートをダウンロード" class="btn btn-warning" />
+      </form>
+    </div>
+  </div>
+
+  <!-- CSVの各行のバリデーションチェック後のエラーを表示する -->
+  <div th:if="${validationError}" th:each="error : ${validationError}">
+    <label class="text-danger" th:text="${error}"></label>
+  </div>
+
+  <!-- CSVの読み込み内容を表示する -->
+
+
+  <div th:if="${orderpay}">
+    <!-- チェックを入れたデータのみ出荷済みに更新する -->
+    <form th:action="@{/orders/payment/update}" th:method="put" th:object="${Order}">
+      <button type="submit" class="btn btn-success">出荷情報更新</button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="all_check" /></th>
+            <th>受注ID</th>
+            <th>金額</th>
+            <th>ステータス</th>
+            <th>支払い方法</th>
+            <th>受注ステータス</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="order, st : ${orderpay}">
+            <td>
+                <input class="row_check" type="checkbox" th:value="${order.id}" th:name="selectedOrderIds"/>
+            </td>
+            <td>
+              <th:block th:text="${order.id}"></th:block>
+              <input type="hidden" th:value="${order.id}"/>
+            </td>
+            <td>
+              <th:block th:text="${order.paid}"></th:block>
+              <input type="hidden" th:value="${order.paid}" />
+            </td>
+            <td>
+              <th:block th:text="${order.paymentStatus}"></th:block>
+              <input type="hidden" th:value="${order.paymentStatus}" />
+            </td>
+            <td>
+              <th:block th:text="${order.paymentMethod}"></th:block>
+              <input type="hidden" th:value="${order.paymentMethod}" />
+            </td>
+            <td>
+              <span class="badge text-bg-danger" th:if="${order.status == 'error'}">エラー</span>
+              <span class="badge text-bg-success" th:if="${order.status == 'success'}">成功</span>
+              <span class="badge text-bg-danger" th:if="${order.status == 'ordered'}">未発送</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+  <h3>未入金</h3>
+  <table>
+    <thead>
+      <tr th:each="order : ${orders}">
+        <td th:text="${order.id}"></td>
+        <td>未入金</td>
+      </tr>
+    </thead>
+  </table>
+
+</div>
+</th:block>
+
+</html>
+<script src="/js/order/order-shipping.js"></script>

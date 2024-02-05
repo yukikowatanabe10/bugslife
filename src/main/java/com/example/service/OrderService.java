@@ -168,6 +168,11 @@ public class OrderService {
     }
 
     @Transactional
+    public List<Order> findByPaymentStatus(String paymentStatus1, String paymentStatus2){
+        return orderRepository.findByPaymentStatusOrPaymentStatus(paymentStatus1, paymentStatus2);
+    }
+
+    @Transactional
     public List<OrderDeliveries> importCSV(MultipartFile file) throws IOException {
         List<OrderDeliveries> deliveries = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(
@@ -204,4 +209,51 @@ public class OrderService {
             }
         }
 	}
-}
+
+    @Transactional
+    public List<Order> importCSVpay(MultipartFile file) throws IOException {
+        List<Order> updatedOrders = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            String line = br.readLine(); // ヘッダーをスキップ
+            while ((line = br.readLine()) != null) {
+                final String[] split = line.replace("\"", "").split(",");
+                Long id = Long.parseLong(split[0]);
+                Double paid = Double.parseDouble(split[1]);
+                String paymentStatus = split[2]; // これが有効な支払いステータスであると仮定
+                String paymentMethod = split[3]; // これが有効な支払い方法であると仮定
+    
+                Order order = findOrderById(id);
+                if (order != null) {
+                    // 既存の注文のフィールドを更新
+                    order.setPaid(paid);
+                    order.setPaymentStatus(paymentStatus);
+                    order.setPaymentMethod(paymentMethod);
+                    
+                    // 更新された注文をリストに追加
+                    updatedOrders.add(order);
+                    // トランザクショナルコンテキスト内でエンティティが管理されている場合、
+                    // 明示的に保存メソッドを呼び出す必要はありません
+                    // トランザクションのコミット時に変更が自動的に永続化されます
+                }
+            }
+        }
+        return updatedOrders;
+    }
+
+    @Transactional
+	public void updateOrderStatusToPayment(List<Long> orderIds){
+		List<Order> orders = orderRepository.findAllById(orderIds);
+		for (Order order : orders) {
+            if ("unpaid".equals(order.getPaymentStatus())) {
+                order.setPaymentStatus("paid");
+                orderRepository.save(order);
+            }
+
+            if("shipped".equals(order.getStatus())){
+                order.setStatus("completed");
+                orderRepository.save(order);
+            }
+
+        }
+	}
+}    

@@ -226,4 +226,71 @@ public class OrderController {
 		orderService.updateOrderStatusToShipped(selectedOrderIds);
         return "redirect:/orders/shipping";
     }
+
+    @GetMapping("/payment")
+    public String payMent(Model model){
+        List<Order> orders = orderService.findByPaymentStatus("unpaid", "partially_paid");
+        for (Order o : orders) {
+            System.out.println(o.getPaymentStatus());
+        }
+        model.addAttribute("orders", orders);
+        return "order/payment";
+    }
+
+    @PostMapping("/payment")
+    public String paymentupload(@RequestParam("file") MultipartFile uploadFile, RedirectAttributes redirectAttributes, Model model){
+        if (uploadFile.isEmpty()) {
+            redirectAttributes.addFlashAttribute("validationError", "ファイルを選択してください。");
+            return "redirect:/orders/shipping";
+        }
+
+        if (!"text/csv".equals(uploadFile.getContentType())) {
+            redirectAttributes.addFlashAttribute("validationError", "CSVファイルを選択してください。");
+            return "redirect:/orders/shipping";
+        } 
+
+        try{
+            List<Order> pay = orderService.importCSVpay(uploadFile);
+            model.addAttribute("orderpay", pay);
+            return "order/payment";
+        }catch(Throwable e){
+            redirectAttributes.addFlashAttribute("validationError", e.getMessage());
+            e.printStackTrace();
+            return "redirect:/orders/payment";
+        }
+    }
+
+    @PostMapping("/payment/download")
+    public void paymentdownload(HttpServletResponse response) {
+        String csvHeader = "orderId,paid,paymentStatus,paymentMethod\n";
+        StringBuilder csvBuilder = new StringBuilder(csvHeader);
+        List<Order> orders = this.orderService.findByStatus("ordered");
+
+        for (Order order : orders) {
+            csvBuilder.append(order.getId()).append(",");
+            csvBuilder.append(order.getPaid()).append(",");
+            csvBuilder.append(order.getPaymentStatus()).append(",");
+            csvBuilder.append(order.getPaymentMethod()).append(",").append("\n");
+        }
+
+        try {
+            response.setContentType("text/csv");
+            response.setHeader("Content-Disposition", "attachment; filename=\"payment.csv\"");
+    
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(csvBuilder.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @PutMapping("/payment/update")
+    public String update(@ModelAttribute OrderShippingData orderShippingData){
+        List<Long> selectedOrderIds = orderShippingData.getSelectedOrderIds();
+        orderService.updateOrderStatusToPayment(selectedOrderIds);
+        return "redirect:/orders/payment";
+    }
+
 }
